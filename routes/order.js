@@ -67,7 +67,7 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
 });
 
 //Get Monthly Income
-router.get("/icome", verifyTokenAndAdmin, async (req, res) => {
+router.get("/income", verifyTokenAndAdmin, async (req, res) => {
   const date = new Date();
   const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
   const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
@@ -78,10 +78,17 @@ router.get("/icome", verifyTokenAndAdmin, async (req, res) => {
       {
         $project:{
           month: { $month: "$createdAt" },
-          sales: "$amount"
-        }
-      }
+          sales: "$amount",
+        },
+      },
+        {
+          $group: {
+            _id: "$month",
+            total: { $sum: "$sales" }
+          },
+        },
     ]);
+    res.status(200).json(income);
   }catch (err){
     res.status(500).json(err);
   }
